@@ -1,0 +1,19 @@
+services:
+  api:
+    build:
+      context: .
+    volumes:
+      - ./src:/app/src
+    ports:
+      - "8000:8000"
+    networks:
+      - api_postgres
+    command: ["uv", "run", "fastapi", "dev", "src/main.py", "--host", "0.0.0.0", "--port", "8000"]
+
+
+
+
+volumes:
+  postgres_data:
+networks:
+  api_postgres:
