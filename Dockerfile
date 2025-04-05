@@ -9,4 +9,5 @@ RUN uv sync
 COPY . .
 
 EXPOSE 8000
-CMD ["uv", "run", "fastapi", "run", "src/main.py", "--host", "0.0.0.0", "--port", "8000"]
+ENV PYTHONPATH=/app
+CMD ["uv", "run", "fastapi", "dev", "src/main.py", "--host", "0.0.0.0", "--port", "8000"]
