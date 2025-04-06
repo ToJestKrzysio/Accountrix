@@ -10,6 +10,7 @@ import pytest
 from src.accounts import models
 from src.accounts.persistance import AccountPersistenceManager
 from src.common import exceptions
+from tests.accounts.factories import create_accounts_map
 
 
 @pytest.fixture
@@ -28,15 +29,6 @@ def manager(filepath):
     with open(filepath, "w") as file:
         file.write(models.AccountsMap().model_dump_json())
     return AccountPersistenceManager(filepath)
-
-
-def create_accounts_map(count: int = 3) -> models.AccountsMap:
-    accounts = {}
-    for idx in range(count):
-        uuid_ = uuid.uuid4()
-        account = models.Account(id=uuid_, username=f"user_{idx}", balance=Decimal((idx + 1) * 10))
-        accounts[uuid_] = account
-    return models.AccountsMap.model_validate(accounts)
 
 
 def test_create_file_file_already_exists(filepath):

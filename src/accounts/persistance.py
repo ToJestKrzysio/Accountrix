@@ -116,4 +116,3 @@ class AccountPersistenceManager:
         del accounts.root[account.id]
         self._save(accounts)
         logger.debug(f"Account with id {account_id} was deleted")
-
