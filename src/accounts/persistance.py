@@ -14,16 +14,21 @@ class AccountPersistenceManager:
     def __init__(self, filepath: Path | None = None):
         default_filepath = Path(os.getcwd()).parent.parent / "data" / "accounts.json"
         self.filepath = filepath or default_filepath
-        self._create_file_in_not_exists()
+        self._create_file()
 
-    def _create_file_in_not_exists(self):
-        """ Checks whether file exists, if not creates new file to store data in. """
+    def _create_file(self) -> bool:
+        """
+        Checks whether file exists, and creates it if necessary
+
+        :return: True if file was created, False otherwise.
+        """
         if self.filepath.exists():
-            return
+            return False
 
         with self.filepath.open(mode="w") as file:
             file.write(models.AccountsMap().model_dump_json())
 
+        return True
 
     def _load(self) -> models.AccountsMap:
         """ Load accounts data from file. """
@@ -39,6 +44,31 @@ class AccountPersistenceManager:
         with self.filepath.open("w") as file:
             file.write(accounts.model_dump_json())
         logger.debug("Saved accounts data")
+
+    def create(self, account: models.Account) -> models.Account:
+        """ Create new account with provided payload. """
+        logger.debug(f"Creating new account with payload {account}")
+        accounts = self._load()
+
+        for existing_account in accounts.root.values():
+            if existing_account.username == account.username:
+                raise exceptions.RecordCreateFailed(f"Account with username {account.username} already exists.")
+
+        retries = 0
+        while account.id in accounts.root and retries < 10:
+            logger.warning(f"Account id already in use: {account.id}. Generating a new one.")
+            if retries >= 5:
+                msg = "Failed to assigning valid account id"
+                logger.error(msg)
+                raise exceptions.RecordCreateFailed(msg)
+
+            account.id = uuid4()
+            retries += 1
+
+        accounts.root[account.id] = account
+        self._save(accounts)
+        logger.debug(f"Account with id {account.id} was created")
+        return account
 
     def list(self) -> list[models.Account]:
         """ Retrieve list of all accounts. """
@@ -62,59 +92,28 @@ class AccountPersistenceManager:
         logger.debug(f"Account with id {account.id} found")
         return account
 
-    def update(self, account_id: str, account: models.Account) -> models.Account:
+    def update(self, account_id: UUID, account: models.Account) -> models.Account:
         """ Set record with id to newly provided value. """
         logger.debug(f"Updating account with id {account_id} using payload {account}")
         accounts = self._load()
 
-        if account_id not in accounts.root:
-            msg = f"Account with id {account_id} does not exist"
-            logger.error(msg)
-            raise exceptions.RecordDoesNotExist(msg)
+        account = self.get(account_id)
 
-        account.id = UUID(account_id)
+        account.id = account_id
         accounts.root[account_id] = account
         self._save(accounts)
         logger.debug(f"Account with id {account_id} was updated")
         return account
 
 
-    def delete(self, account_id: str) -> None:
+    def delete(self, account_id: UUID) -> None:
         """ Delete account by provided id. """
         logger.debug(f"Deleting account with id {account_id}")
         accounts = self._load()
 
-        if account_id not in accounts.root:
-            msg = f"Account with id {account_id} does not exist"
-            logger.error(msg)
-            raise exceptions.RecordDoesNotExist(msg)
+        account = self.get(account_id)
 
-        del accounts.root[account_id]
+        del accounts.root[account.id]
         self._save(accounts)
         logger.debug(f"Account with id {account_id} was deleted")
-
-    def create(self, account: models.Account) -> models.Account:
-        """ Create new account with provided payload. """
-        logger.debug(f"Creating new account with payload {account}")
-        accounts = self._load()
-
-        for existing_account in accounts.root.values():
-            if existing_account.username == account.username:
-                raise exceptions.RecordCreateFailed(f"Account with username {account.username} already exists.")
-
-        retries = 0
-        while account.id in accounts.root and retries < 10:
-            logger.warning(f"Account id already in use: {account.id}. Generating a new one.")
-            if retries >= 5:
-                msg = "Failed to assigning valid account id"
-                logger.error(msg)
-                raise exceptions.RecordCreateFailed(msg)
-
-            account.id = uuid4()
-            retries += 1
-
-        accounts.roor[account.id] = account
-        self._save(accounts)
-        logger.debug(f"Account with id {account.id} was created")
-        return account
 
