@@ -38,3 +38,11 @@ for information about specific endpoints refer to swagger [API documentation](ht
 │   │   └── services.py (Business logic, useful if multiple means of communication with API would be necessary)
 │   └── health (Health check application)
 └── tests (Tests for the application)
+
+## Requirements
+Account should have following information: `id`, `username`, `balance`
+- [ ] Endpoint to list all accounts
+- [ ] Endpoint to get details for specific account by it's id
+- [ ] Endpoint to create new account
+- [ ] Endpoint to update specific account by it's id
+- [ ] Endpoint to delete specific account by it's id
