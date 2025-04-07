@@ -57,7 +57,7 @@ def create_new_account(
     account = models.Account.model_validate(account_data.model_dump())
     try:
         new_account = manager.create(account)
-    except exceptions.RecordCreateFailed as err:
+    except exceptions.RecordAlreadyExists as err:
         raise HTTPException(status_code=409, detail=str(err))
 
     return schema.Account.model_validate(new_account.model_dump())

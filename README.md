@@ -9,17 +9,19 @@ Project can be run using docker, via UV, or using just venv.
 docker compose up --build --no-cache
 ```
 
-#### Run using UV
+#### Run using UV  (on linux / mac)
 ```shell
+export PYTHONPATH=$(pwd) # Add current location to python path, required for absolute imports
 uv sync
 uv run fastapi run src/main.py --host 127.0.01 --port 8000
 ```
 
 #### Run using Venv (on linux / mac)
 ```shell
+export PYTHONPATH=$(pwd) # Add current location to python path, required for absolute imports
 python -m .venv
 source .venv/bin/activate
-fastapi run src/main.py --host 127.0.01 --port 8000
+fastapi run src/main.py --host 127.0.0.1 --port 8000
 ```
 
 ## Overview
