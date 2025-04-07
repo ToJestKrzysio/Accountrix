@@ -81,7 +81,7 @@ def test_create_username_used(manager, filepath):
 def test_create_id_used(manager, filepath):
     uuid_ = uuid.uuid4()
     account_1 = models.Account(id=uuid_, username="DogPool", balance=Decimal(42))
-    account_2 = models.Account(id=uuid_, username="UgandanKnuckles", balance=Decimal(42))
+    account_2 = models.Account(id=uuid_, username="Knuckles", balance=Decimal(42))
 
     account_1 = manager.create(account_1)
     account_2 = manager.create(account_2)
@@ -154,7 +154,7 @@ def test_update_happy_path(manager, filepath):
     selected_id = random.choice(list(accounts.root.keys()))
     selected_account = accounts.root[selected_id]
     selected_account.balance = Decimal(123)
-    selected_account.username = "UgandanKnuckles"
+    selected_account.username = "Knuckles"
 
     result = manager.update(selected_id, selected_account)
 

@@ -8,5 +8,9 @@ api_router.include_router(health_router, prefix="/health")
 api_router.include_router(accounts_router, prefix="/accounts")
 
 
-app = FastAPI()
+app = FastAPI(
+    title="Accountrix API",
+    description="This is a simple API allowing user to perform CRUD operations on accounts.",
+    contact={"email": "krzysztof.plonka64@gmail.com"},
+)
 app.include_router(api_router)
