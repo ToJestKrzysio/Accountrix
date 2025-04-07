@@ -18,6 +18,7 @@ def directory():
     with TemporaryDirectory() as tmpdir:
         yield Path(tmpdir)
 
+
 @pytest.fixture
 def filepath(directory):
     with NamedTemporaryFile(dir=directory, prefix="accounts", suffix=".json", mode="r+") as file:
@@ -65,8 +66,7 @@ def test_create_username_used(manager, filepath):
 
     account_1 = manager.create(account_1)
     with pytest.raises(
-            exceptions.RecordCreateFailed,
-            match=f"Account with username {account_2.username} already exists."
+        exceptions.RecordAlreadyExists, match=f"Account with username {account_2.username} already exists."
     ):
         manager.create(account_2)
 
@@ -169,6 +169,15 @@ def test_update_non_existing_account(manager, filepath):
     selected_id = uuid.uuid4()
     with pytest.raises(exceptions.RecordDoesNotExist):
         manager.update(selected_id, models.Account(username="404NotFound", balance=Decimal(106)))
+
+
+def test_update_username_used(manager, filepath):
+    manager.create(models.Account(username="DogPool", balance=Decimal(42)))
+    acc_2 = manager.create(models.Account(username="FrogDoom", balance=Decimal(120)))
+    acc_2.username = "DogPool"
+
+    with pytest.raises(exceptions.RecordAlreadyExists, match=f"Account with username {acc_2.username} already exists."):
+        manager.update(acc_2.id, acc_2)
 
 
 def test_delete_happy_path(manager, filepath):

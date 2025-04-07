@@ -11,4 +11,3 @@ def create_accounts_map(count: int = 3) -> models.AccountsMap:
         account = models.Account(id=uuid_, username=f"user_{idx}", balance=Decimal((idx + 1) * 10))
         accounts[uuid_] = account
     return models.AccountsMap.model_validate(accounts)
-
